@@ -1,0 +1,62 @@
+---
+title: "Activity: Avocado Prices"
+output: rmdformats::readthedown
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      echo=FALSE, warning=FALSE, message=FALSE,eval=TRUE, include = FALSE)
+```
+
+
+# Instructions
+
+
+I advise you to focus particularly on:
+
+* Setting chunk options carefully.
+
+* Making sure you don't print out more output than you need to.
+
+* Making your code readable and nicely formatted. 
+
+* Thinking through your desired result **before** writing any code.
+
+# Introduction
+
+In this lab we're going to be looking at avocado prices. 
+
+The dataset comes to us from kaggle and represents weekly retail scan data.  It is available to download from Canvas under the name `avocado.csv`.  A description of the data can be found [here.](https://www.kaggle.com/neuromusic/avocado-prices)
+
+```{r, echo = FALSE}
+library(tidyverse)
+avo <- read_csv("https://www.dropbox.com/s/vsc1dkosz6nwake/avocado.csv?dl=1")
+```
+
+0) Create an R Markdown file, load the data, and declare your package dependencies. 
+
+1) Briefly describe the dataset.  What information does it contain?
+
+2) Clean the data in any way you see fit. In particular, look carefully at the `region` variable.  Notice that the category `LosAngeles` is contained in `California`, which is contained in `West`, which is contained in `TotalUS`.  Think about how you want to handle this issue in your analysis.
+
+
+
+# Exercises
+
+
+1) Which major region sold the most organic small Hass avocados in 2017? 
+
+2) Use `separate()` to split the `Date` variable into year, month, and day.  In which month is the highest volume of avocado sales?
+
+3) Which metro area regions sold the most total avocados?  Plot side-by-side boxplots of Total Volume for only the 5 regions with the highest averages for the Total Volume variable. 
+
+
+# Reshaping
+
+The following four California regions are in this dataset:  LosAngeles, SanDiego, Sacramento, SanFrancisco.  Answer the following questions about the California regions only.  In which regions is the price of organic versus conventional avocados most different?  Support your answer with a few summary numbers and a plot.  
+
+*Hint: This questions will require restructuring of your data!*
+
+
+
+

@@ -1,0 +1,8 @@
+"0","mtcars %>%
+  mutate(
+    am = factor(am),
+    cyl = factor(cyl)
+  ) %>%
+  chisq_test(am ~ cyl)
+"
+"2","Chi-squared approximation may be incorrect"

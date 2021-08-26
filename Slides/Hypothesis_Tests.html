@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Hypothesis Testing</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Hypothesis Testing
+
+---
+
+
+
+
+
+
+
+
+---
+## Setup
+
+
+```r
+library(tidyverse)
+library(tidymodels)
+```
+
+```
+## Warning: package 'tidymodels' was built under R version 4.0.2
+```
+
+```
+## -- Attaching packages -------------------------------------- tidymodels 0.1.1 --
+```
+
+```
+## v broom     0.7.0          v recipes   0.1.13    
+## v dials     0.0.8          v rsample   0.0.7     
+## v infer     0.5.3          v tune      0.1.1     
+## v modeldata 0.0.2          v workflows 0.2.2     
+## v parsnip   0.1.5.9002     v yardstick 0.0.7
+```
+
+```
+## Warning: package 'broom' was built under R version 4.0.2
+```
+
+```
+## Warning: package 'dials' was built under R version 4.0.2
+```
+
+```
+## Warning: package 'scales' was built under R version 4.0.2
+```
+
+```
+## Warning: package 'infer' was built under R version 4.0.2
+```
+
+```
+## Warning: package 'modeldata' was built under R version 4.0.2
+```
+
+```
+## Warning: package 'recipes' was built under R version 4.0.2
+```
+
+```
+## Warning: package 'rsample' was built under R version 4.0.2
+```
+
+```
+## Warning: package 'tune' was built under R version 4.0.2
+```
+
+```
+## Warning: package 'workflows' was built under R version 4.0.5
+```
+
+```
+## Warning: package 'yardstick' was built under R version 4.0.2
+```
+
+```
+## -- Conflicts ----------------------------------------- tidymodels_conflicts() --
+## x scales::discard() masks purrr::discard()
+## x dplyr::filter()   masks stats::filter()
+## x recipes::fixed()  masks stringr::fixed()
+## x dplyr::lag()      masks stats::lag()
+## x yardstick::spec() masks readr::spec()
+## x recipes::step()   masks stats::step()
+```
+
+---
+## Difference of means
+
+The `mtcars` dataset contains information about 32 cars.
+
+Suppose we want to know if automatic and manual cars have the same miles per gallon.
+
+--
+
+
+```r
+mtcars %&gt;%
+  group_by(am) %&gt;%
+  summarize(mean(mpg))
+```
+
+```
+## # A tibble: 2 x 2
+##      am `mean(mpg)`
+##   &lt;dbl&gt;       &lt;dbl&gt;
+## 1     0        17.1
+## 2     1        24.4
+```
+
+
+---
+## Difference of Means
+
+Of course, the 32 car models in this dataset are **not** all the
+cars in the world.  
+
+--
+
+So the **true difference of means** between is probably not *exactly* 24.4-17.1 = 7.3.
+
+--
+
+But do we have **evidence** that the difference in means is **not zero**?
+
+---
+## Two-sample t-test
+
+
+```r
+my_test &lt;- mtcars %&gt;%
+  t_test(response = mpg,
+         explanatory = am)
+```
+
+```
+## Warning: The statistic is based on a difference or ratio; by default, for
+## difference-based statistics, the explanatory variable is subtracted in the order
+## "0" - "1", or divided in the order "0" / "1" for ratio-based statistics. To
+## specify this order yourself, supply `order = c("0", "1")`.
+```
+
+```r
+my_test
+```
+
+```
+## # A tibble: 1 x 6
+##   statistic  t_df p_value alternative lower_ci upper_ci
+##       &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;          &lt;dbl&gt;    &lt;dbl&gt;
+## 1     -3.77  18.3 0.00137 two.sided      -11.3    -3.21
+```
+
+Based on **this sample**, we have **strong evidence** that the mpg is different.
+
+---
+## Two-sample t-test
+
+
+```r
+t.test(mpg ~ am, data = mtcars)
+```
+
+```
+## 
+## 	Welch Two Sample t-test
+## 
+## data:  mpg by am
+## t = -3.7671, df = 18.332, p-value = 0.001374
+## alternative hypothesis: true difference in means is not equal to 0
+## 95 percent confidence interval:
+##  -11.280194  -3.209684
+## sample estimates:
+## mean in group 0 mean in group 1 
+##        17.14737        24.39231
+```
+
+---
+## Two-sample t-test
+
+
+```r
+t.test(mpg ~ am, data = mtcars) %&gt;%
+  tidy()
+```
+
+```
+## # A tibble: 1 x 10
+##   estimate estimate1 estimate2 statistic p.value parameter conf.low conf.high
+##      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;   &lt;dbl&gt;     &lt;dbl&gt;    &lt;dbl&gt;     &lt;dbl&gt;
+## 1    -7.24      17.1      24.4     -3.77 0.00137      18.3    -11.3     -3.21
+## # ... with 2 more variables: method &lt;chr&gt;, alternative &lt;chr&gt;
+```
+
+
+---
+## Significance vs effect size
+
+
+In English, "significant" means **important** or **big**.
+
+--
+
+In French, "*significant*" means **signifying** or **indicative**.
+
+--
+
+**Statistical Significance** comes from the French version.
+
+---
+## Significance vs effect size
+
+
+The **effect size** can be large but **insignificant**.
+
+--
+
+
+&gt; You sample 3 people from California and 3 people from New York.  You find a difference in average annual salaries of $500,000.  Does this *signify* that CA and NY have different salaries overall?
+
+--
+
+The **effect size** can be small but **significant**.
+
+--
+
+&gt; You sample 1000 people from California and 1000 people from New York.  You find a difference in average annual salaries of $10.  Does this *signify* that CA and NY have different salaries overall?
+
+---
+## Reporting results
+
+We need to report both the effect size **and** the significance.
+
+--
+
+&gt; We observe that on average, manual cars have 7.3 more miles per gallon than automatic cars.
+
+&gt; With a p-value of 0.001, we reject the null hypothesis that mpgs is equal.  We have strong evidence that manual cars have more mpg on average.
+
+---
+class: center, middle, inverse
+# What assumptions did we rely on?
+
+---
+## The t distribution
+
+![](Hypothesis_Tests_files/figure-html/unnamed-chunk-7-1.png)&lt;!-- --&gt;
+
+---
+class: center, middle, inverse
+# The Central Limit Theorem!
+
+--
+
+## The *sample mean* is approximately Normal (t)
+
+## As long as it's a mean of many (say &gt; 15) samples.
+
+---
+class: center, middle, inverse
+# Categorical Data
+
+---
+
+## Transmission and gears
+
+Now consider the question:  Do automatic and manual cars tend to have different types of engines?
+
+--
+
+
+```r
+mtcars %&gt;%
+  count(am, cyl)
+```
+
+```
+##   am cyl  n
+## 1  0   4  3
+## 2  0   6  4
+## 3  0   8 12
+## 4  1   4  8
+## 5  1   6  3
+## 6  1   8  2
+```
+
+---
+
+## Transmission and gears
+
+We **could** do a t-test of "average cylinders" - but this doesn't really make sense; these are *categories* of engine types.
+
+--
+
+Instead: **chi-square tests**
+
+--
+
+Null hypothesis:  There is **no relationship** between transmission type and engine type.
+
+--
+
+Alternate hypothesis:  There **is a relationship**.
+
+---
+
+## Transmission and gears
+
+
+```r
+mtcars %&gt;%
+  janitor::tabyl(am, cyl)
+```
+
+```
+##  am 4 6  8
+##   0 3 4 12
+##   1 8 3  2
+```
+
+---
+
+## Transmission and gears
+
+
+```r
+library(janitor)
+```
+
+```
+## Warning: package 'janitor' was built under R version 4.0.2
+```
+
+```
+## 
+## Attaching package: 'janitor'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     chisq.test, fisher.test
+```
+
+```r
+mtcars %&gt;%
+  tabyl(am, cyl) %&gt;%
+  adorn_percentages()
+```
+
+```
+##  am         4         6         8
+##   0 0.1578947 0.2105263 0.6315789
+##   1 0.6153846 0.2307692 0.1538462
+```
+
+---
+
+## Transmission and gears
+
+What happens if you swap the order of the variables?
+
+--
+
+
+```r
+mtcars %&gt;%
+  tabyl(cyl, am) %&gt;%
+  adorn_percentages()
+```
+
+```
+##  cyl         0         1
+##    4 0.2727273 0.7272727
+##    6 0.5714286 0.4285714
+##    8 0.8571429 0.1428571
+```
+
+---
+## Transmission and gears
+
+
+```r
+mtcars %&gt;%
+  chisq_test(am ~ cyl)
+```
+
+```
+## Error: The response variable of `am` is not appropriate
+## since the response variable is expected to be categorical.
+```
+---
+
+## Transmission and gears
+
+
+
+```r
+mtcars %&gt;%
+  mutate(
+    am = factor(am),
+    cyl = factor(cyl)
+  ) %&gt;%
+  chisq_test(am ~ cyl)
+```
+
+```
+## Warning in stats::chisq.test(table(x), ...): Chi-squared approximation may be
+## incorrect
+```
+
+```
+## # A tibble: 1 x 3
+##   statistic chisq_df p_value
+##       &lt;dbl&gt;    &lt;int&gt;   &lt;dbl&gt;
+## 1      8.74        2  0.0126
+```
+
+---
+
+## Transmission and gears
+
+What happens if you switch the order of the variables?
+
+
+```r
+mtcars %&gt;%
+  mutate(
+    am = factor(am),
+    cyl = factor(cyl)
+  ) %&gt;%
+  chisq_test(cyl ~ am)
+```
+
+```
+## Warning in stats::chisq.test(table(x), ...): Chi-squared approximation may be
+## incorrect
+```
+
+```
+## # A tibble: 1 x 3
+##   statistic chisq_df p_value
+##       &lt;dbl&gt;    &lt;int&gt;   &lt;dbl&gt;
+## 1      8.74        2  0.0126
+```
+
+---
+## Conclusion
+
+We have **evidence** that there is a relationship between transmission type and engine type.
+
+--
+
+Manual cars tend to have more 4-cylinder engines, while automatic cars tend to have more 8-cylinder engines
+
+---
+## Word of Caution
+
+Do automatic cars and manual cars tend to have a different number of gears?
+
+
+```r
+mtcars %&gt;%
+  tabyl(am, gear) %&gt;%
+  adorn_percentages()
+```
+
+```
+##  am         3         4         5
+##   0 0.7894737 0.2105263 0.0000000
+##   1 0.0000000 0.6153846 0.3846154
+```
+
+---
+## Word of Caution
+
+
+```r
+mtcars %&gt;%
+  mutate(
+    am = factor(am),
+    gear = factor(gear)
+  ) %&gt;%
+  chisq_test(gear ~ am)
+```
+
+```
+## Warning in stats::chisq.test(table(x), ...): Chi-squared approximation may be
+## incorrect
+```
+
+```
+## # A tibble: 1 x 3
+##   statistic chisq_df   p_value
+##       &lt;dbl&gt;    &lt;int&gt;     &lt;dbl&gt;
+## 1      20.9        2 0.0000283
+```
+
+---
+## Word of Caution
+
+
+```r
+mtcars %&gt;%
+  tabyl(am, gear) %&gt;%
+  fisher.test()
+```
+
+```
+## 
+## 	Fisher's Exact Test for Count Data
+## 
+## data:  .
+## p-value = 2.13e-06
+## alternative hypothesis: two.sided
+```
+
+
+---
+class: center, middle, inverse
+
+# Your Turn!
+
+---
+# Your Turn
+
+* Do automatic cars and manual cars tend to have different horsepower?
+
+* Do automatic cars and manual cars tend to have a different shape of engine?  (Hint: `?mtcars` for more info about the dataset.)
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

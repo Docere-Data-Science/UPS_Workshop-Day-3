@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Modeling</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Modeling
+
+---
+
+
+
+
+
+
+
+
+class: center, middle, inverse
+# Modeling
+
+---
+
+# Data Exploration to Data Analysis
+
+* What are the observations?
+
+* What variables do we have?
+
+--
+
+* What are the values of these variables like?
+
+--
+
+* What kinds of relationships are there among the variables we have?
+
+---
+
+# The Overall Goal
+
+* Become familiar with tools for *understanding data*
+
+* In particular, characterize the relationship between input and output variables by estimating `\(f\)`:
+
+$$
+	Y = f(X) + \epsilon
+$$
+	
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SmoothFunctionOnData.PNG" width="50%" height="50%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# In General
+
+* Suppose we observe a response `\(Y\)` and `\(p\)` different predictors, `\(X_1, X_2, \dots, X_p\)`
+
+* i.e. We have data on a response/target/output variable and many predictor/explanatory/feature variables
+
+* We assume there is some relationship which can be written
+
+$$
+	Y = f(X) + \epsilon
+$$
+	
+* where `\(f\)` is unknown and `\(\epsilon\)` is a random error term independent of `\(X\)` with mean 0
+	
+* We want to estimate `\(f\)`
+
+---
+
+# Prediction versus Inference
+
+.center[
+**Prediction** is primarily concerned with estimating the output value ( `\(\hat{Y}\)` ) for a given set of inputs; while **Inference** is more concerned with the way(s) that `\(Y\)` is affected as `\(X_1, \dots, X_p\)` change.
+]
+
+* We'll talk a little about both! 
+
+---
+
+# The Carseats Dataset in the ISLR package for R
+
+
+```r
+install.packages("ISLR")
+library(ISLR)
+```
+
+* 400 observations on the following variables:
+    * Sales (in thousands) at each location
+		* Price
+		* US
+		* ...many other variables
+	  * More info here: [https://rdrr.io/cran/ISLR/man/Carseats.html](https://rdrr.io/cran/ISLR/man/Carseats.html)
+
+---
+
+# Research Questions
+
+* Our primary question:
+
+.center[
+*Can we predict Sales using the other information in this dataset?*
+]
+
+* **Sales** is called our response, or dependent, variable.
+* Any variable(s) used to predict **Sales** are called independent, explanatory, or predictor variables.
+
+---
+
+
+class: center, middle, inverse
+# Univariate
+
+---
+
+# What do we know about Sales?
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesHist.png" width="50%" height="50%" style="display: block; margin: auto;" /&gt;&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesSumm.png" width="50%" height="50%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Other Possible Visualizations...?
+
+--
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesBox.png" width="50%" height="50%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Another Visualization?
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesPoints.png" width="50%" height="50%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Another Visualization? With the Mean...
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesPointsMean.png" width="50%" height="50%" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+# Predicting Sales Part I
+
+* Without knowing any other information or using any other data, what would your prediction for Sales be?
+
+--
+
+* The most representative value of Sales that we have access to, right?!
+
+--
+
+* The mean or average of Sales is a good start: 7.5 thousand
+
+---
+
+class: center, middle, inverse
+# Bivariate
+
+---
+
+# But we DO have more data!
+
+* Does knowing whether a store is in the U.S. or not help in predicting Sales?
+
+--
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesUSHist.png" width="50%" height="50%" style="display: block; margin: auto;" /&gt;
+
+---
+
+
+# Does being in the U.S. change our Sales prediction?
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesUSBox.png" width="50%" height="50%" style="display: block; margin: auto;" /&gt;
+
+* Any better?
+
+---
+
+# Predicting Sales Part II
+
+* If you knew a store was in the U.S., what would your prediction for Sales be?
+
+--
+
+* The most representative value of Sales for stores in the U.S. that we have access to, right?!
+
+--
+
+* The mean or average of Sales in the U.S. is a good start:
+
+--
+
+* Compute the average Sales for stores in the U.S.
+* Compute the average Sales for stores not in the U.S.
+
+---
+
+# So what did we just do?!
+
+--
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesUSPointsMeans.png" width="50%" height="50%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# What are we doing *statistically*?
+
+
+* Does knowing whether a store is in the U.S. change our prediction of Sales? **OR**
+
+* Is there a relationship between a store's location and its Sales? **OR**
+
+* Is there a difference in the average Sales between stores in the U.S. and stores outside the U.S.?
+
+--
+
+* Hopefully this last question sounds familiar...
+
+.center[
+	**Two-sample ...**
+]
+
+* t-test
+* confidence interval
+
+---
+
+# But What About the Lines on Those Graphs?!
+
+* What's the equation of a horizontal line?
+
+.pull-left[
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesPointsMean.png" width="75%" height="75%" style="display: block; margin: auto;" /&gt;
+]
+
+.pull-left[
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesUSPointsMeans.png" width="75%" height="75%" style="display: block; margin: auto;" /&gt;
+]
+
+---
+
+
+# Our Models Thus Far
+
+* Sales alone:
+$$
+	Sales = \beta_0 + \epsilon
+$$
+
+--
+
+* Sales on US:
+$$
+	Sales = \beta_0 + \beta_1 USYes + \epsilon
+$$
+
+* where we assume `\(\epsilon \sim N(0, \sigma^2)\)`.
+
+---
+
+# Fitting Our Models Using Data
+
+* Sales alone:
+$$
+	E[Sales] = \beta_0
+$$
+$$
+	\hat{Sales} = \hat{\beta}_0  = 7.5
+$$
+
+--
+
+* Sales on US:
+$$
+	E[Sales \vert US] = \beta_0 + \beta_1 USYes
+$$
+$$
+	\hat{Sales} = \hat{\beta}_0 + \hat{\beta}_1 USYes = 6.823 + 1.0439USYes
+$$
+
+* We estimate the **average** Sales using the fitted model!
+* `\(\hat{\beta}_1\)`: we **expect** a 1.0439 thousand unit increase in Sales if a store is in the U.S.
+
+---
+
+# What If Our Categorical Predictor Had More than 2 Categories?
+
+&lt;img src="02-Modeling_files/figure-html/unnamed-chunk-11-1.png" style="display: block; margin: auto;" /&gt;
+
+* This is called an **ANOVA** model: *Analysis of Variance*.
+
+--
+
+* Used to answer a similar question: Are the means of at least two of these groups significantly different? 
+
+* An extension of the two-sample t-test (our earlier example)
+
+---
+
+
+# What is the relationship between Sales and Price?
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesPricePoints.png" width="40%" height="40%" style="display: block; margin: auto;" /&gt;
+
+* We often use **correlation** to describe something like this! But we can do more!
+
+---
+
+# (Least Squares) Best Fit Line
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesPricePointsLine.png" width="50%" height="50%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# The Model Equation of the Best Fit Line
+
+# Sales on Price:
+$$
+	Sales = \beta_0 + \beta_1 Price + \epsilon
+$$
+
+--
+
+$$
+	E[Sales \vert Price] = \beta_0 + \beta_1 Price
+$$
+	
+--
+
+$$
+	\hat{Sales} = \hat{\beta}_0 + \hat{\beta}_1 Price = 13.641915 - 0.053073Price
+$$
+
+* We estimate the **average** Sales using the fitted model!
+* `\(\hat{\beta}_1\)`: we **expect** a 0.053073 thousand (53.073) unit decrease in Sales for every dollar increase in Price. (not causation!)
+
+---
+
+
+# Fitting Linear Models in R
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesPriceLMoutput.png" width="50%" height="50%" style="display: block; margin: auto;" /&gt;
+
+* Check out the **estimate** column for the coefficient estimates!
+
+* The same `lm()` R function can be used to do ANOVA!
+
+---
+
+
+class: center, middle, inverse
+# Multivariate
+
+---
+
+# Our Dataset is Rich...Let's Use It!
+
+* Could we use both Price and US to help predict Sales?
+
+--
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesPriceUSPoints.png" width="50%" height="50%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# What Do We Do With Three Variables?
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesPriceUSPoints.png" width="50%" height="50%" style="display: block; margin: auto;" /&gt;
+
+* What are our model options?
+
+---
+
+# YOLO Lines!
+
+* We could allow for completely different fitted lines for each of the two groups:
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesPriceUSfull.png" width="50%" height="50%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Model Equation for YOLO Lines
+
+* Individual Terms and Interaction Term
+
+$$
+	\hat{Sales} = \hat{\beta}_0 + \hat{\beta}_1 Price + \hat{\beta}_2 USYes + \hat{\beta}_3 Price*USYes
+$$
+
+* This means knowing that a store is in the US changes:
+
+1. the **slope** of the relationship between *Price* and **average** *Sales* by `\(\hat{\beta}_3\)`
+
+2. the **intercept** by `\(\hat{\beta}_2\)`.
+
+---
+
+# Same Slope for Both Groups
+
+* We could force the line for each of the two groups to have the same slope:
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesPriceUSsameslope.png" width="40%" height="40%" style="display: block; margin: auto;" /&gt;
+
+--
+
+$$
+	\hat{Sales} = \hat{\beta}_0 + \hat{\beta}_1 Price + \hat{\beta}_2 USYes
+$$
+
+---
+
+# Same Intercept for Both Groups
+
+* We could force the line for each of the two groups to have the same intercept:
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesPriceUSsameintercept.png" width="40%" height="40%" style="display: block; margin: auto;" /&gt;
+
+--
+
+$$
+	\hat{Sales} = \hat{\beta}_0 + \hat{\beta}_1 Price + \hat{\beta}_2 Price*USYes
+$$
+---
+
+# Fitting Bigger Models in R
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/SalesPriceFullLMoutput.png" width="50%" height="50%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# We can get crazy!...but how do we choose?
+
+
+```r
+str(Carseats)
+```
+
+```
+## 'data.frame':	400 obs. of  11 variables:
+##  $ Sales      : num  9.5 11.22 10.06 7.4 4.15 ...
+##  $ CompPrice  : num  138 111 113 117 141 124 115 136 132 132 ...
+##  $ Income     : num  73 48 35 100 64 113 105 81 110 113 ...
+##  $ Advertising: num  11 16 10 4 3 13 0 15 0 0 ...
+##  $ Population : num  276 260 269 466 340 501 45 425 108 131 ...
+##  $ Price      : num  120 83 80 97 128 72 108 120 124 124 ...
+##  $ ShelveLoc  : Factor w/ 3 levels "Bad","Good","Medium": 1 2 3 3 1 1 3 2 3 3 ...
+##  $ Age        : num  42 65 59 55 38 78 71 67 76 76 ...
+##  $ Education  : num  17 10 12 14 13 16 15 10 10 17 ...
+##  $ Urban      : Factor w/ 2 levels "No","Yes": 2 2 2 2 2 1 2 2 1 1 ...
+##  $ US         : Factor w/ 2 levels "No","Yes": 2 2 2 2 1 2 1 2 1 2 ...
+```
+---
+
+class: center, middle, inverse
+# Model Evaluation
+
+---
+
+# Model Evaluation
+
+* Two primary characteristics on which to judge a model's quality:
+
+--
+
+1. Interpretability
+
+--
+
+2. How well it fits the data (e.g. accuracy, error, etc.)
+
+---
+
+# Interpretability
+
+* This is usually an immediate consequence of complexity of the model:
+
+- More predictor variables *tend* to make the model **less** interpretable
+
+- Higher order terms of variables *tend* to make the model **less** interpretable
+
+- More complex model forms (e.g. non-linear) *tend* to make the model **less** interpretable
+
+--
+
+* However, this tends to be a trade-off:
+
+.center[
+*The more complex a model is the less likely it is to be easily interpreted, but the more likely it is to fit the data well*
+]
+
+* So let's discuss metrics for assessing how well models fit data!
+---
+
+# Coefficient of Determination: `\(R^2\)`
+
+* `\(R^2\)`: the proportion of variation in the Sales (response) explained by our model given our predictors (e.g. Price, US, etc.).
+
+--
+
+* What values can `\(R^2\)` take on?
+
+--
+
+* Between 0 and 1
+
+--
+
+* **[Higher/Lower]** values of `\(R^2\)` indicate a better fit of our model
+
+--
+
+* Can the fit of our model get worse as we add more information (variables) to it?
+
+--
+
+* Imagine the game 20 questions...
+
+--
+
+* In regression, this means that `\(R^2\)` can NEVER go down as we add variables to our model!
+
+* What's potentially bad about this? For example, what's potentially bad about a model with 1000 predictors?
+
+---
+
+# Global Inference in Regression
+
+* Is there a single metric that can tell us if our model is worth using at all? Say, better than just taking the average Sales?
+
+--
+
+* Global F-test:
+	
+.center[
+`\(H_0\)`: `\(\beta_1 = \beta_2 = \cdots = \beta_k = 0\)`
+
+`\(H_a\)`: At least one coefficient is not 0
+]
+	
+...in other words:
+	
+.center[
+`\(H_0\)`: None of the terms have a linear relationship with our response
+
+`\(H_a\)`: At least one of the terms in our model has a linear relationship with our response
+]
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/FullModelOutput.png" width="30%" height="30%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# What About Prediction Accuracy?
+
+* If our main concern is prediction of Sales, how could we assess the model in a way more tailored to this goal?
+
+--
+
+* Mean squared error (MSE):
+
+$$
+		\frac{1}{n} \sum_{i=1}^n (y_i - \hat{y}_i)^2
+$$
+--
+
+* **[Higher/Lower]** values of MSE indicate our model is better
+
+---
+
+# Validation for Prediction
+
+* Did your professors ever say, "Here, do this homework assignment again as your exam"?
+
+--
+
+* Why not?
+
+--
+
+* Computing the MSE on the same data that we used to fit our model is like giving students a homework they've already done as their exam!
+
+* We want to *test* our model out on data it hasn't seen!
+
+--
+
+* Validation involves breaking your dataset up into training and testing pieces: (1) Fit your model on the training piece and (2) test it out (compute the MSE) on the testing piece.
+
+* So, we actually want low *test* MSE!
+
+---
+
+# Model Complexity vs. Performance
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/BiasVarianceTradeoff.PNG" width="50%" height="50%" style="display: block; margin: auto;" /&gt;
+
+* The **[gray/red]** line on the right is the training error, while the **[gray/red]** line is the test error.
+
+--
+
+* Our `\(R^2\)` before was computed on the training data, but was still a very nice metric describing overall fit.
+
+--
+
+* Could we *adjust* the `\(R^2\)` metric to account for the complexity of the model, and hence allow it to go down as we add terms to the model...?
+
+---
+
+# *Adjusted* Metrics for Comparison of Models
+
+* There are a number of metrics that include a piece like the MSE, but also penalize models for having higher numbers of terms:
+
+* Adjusted- `\(R^2\)` (higher values are better)
+
+--
+
+* Akaike Information Criteria (AIC) (lower values are better)
+
+--
+
+* Bayesian Information Criteria (BIC) (lower values are better)
+
+--
+* (Cross-) Validation test error still works! (lower values are better)
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/FullModelOutput.png" width="40%" height="40%" style="display: block; margin: auto;" /&gt;
+
+---
+
+class: center, middle, inverse
+# Model Selection
+
+---
+
+# Where Do All of the Models Come From?
+
+* Say we're considering using Price and US to predict Sales, how many different models can we fit?
+
+--
+
+$$
+		Sales = \beta_0 + \epsilon
+$$
+$$
+		Sales = \beta_0 + \beta_1 Price + \epsilon
+$$
+$$
+		Sales = \beta_0 + \beta_1 USYes + \epsilon
+$$
+$$
+		Sales = \beta_0 + \beta_1 Price + \beta_2 USYes + \epsilon
+$$
+	
+*And possibly even...
+
+$$
+		Sales = \beta_0 + \beta_1 Price + \beta_2 USYes + \beta_3 Price*USYes + \epsilon
+$$
+
+--
+
+* We could fit and compare all of these models in the ways we've discussed...
+
+---
+
+# Model Enumeration
+
+* In general there are `\(2^d\)` possible models (excluding interactions etc.), where `\(d\)` is the number of variables.
+
+--
+
+* This is a lot!
+
+--
+	
+* Procedures for trying out different models:
+
+--
+
+* Best Subsets
+
+* Forward Stepwise Selection
+
+* Backward Stepwise Selection
+
+* Mixed Forward/Backward Selection
+
+---
+
+# Selection *Methods*: Best Subsets
+
+* With `\(p\)` total predictors available:
+
+* Fit all models that contain exactly k predictors; let `\(\mathcal{M}_k\)` be the best of these models (largest `\(R^2\)`)
+
+* Do this for `\(k = 0, \dots, p\)`
+
+* Select a single best model from among `\(\mathcal{M}_0, \dots, \mathcal{M}_p\)`
+
+.center[Which metric should we NOT use to select a single best model?]
+
+
+* Validation prediction error
+* AIC
+* BIC
+* `\(R^2\)`
+* Adjusted `\(R^2\)`
+--
+
+* Problems?
+
+
+---
+
+# Selection *Methods*: Forward Stepwise Selection
+
+* Begin with *null* model (no predictors; `\(\mathcal{M}_0\)`)
+
+* For `\(k = 1, \dots, p-1\)`:
+
+* Consider all `\(p-k\)` models that contain one additional predictor than `\(\mathcal{M}_k\)`
+* Choose the best among these `\(p-k\)` models (largest `\(R^2\)`), and call it `\(\mathcal{M}_{k+1}\)`
+
+* Select a single best model from among `\(\mathcal{M}_0, \dots, \mathcal{M}_p\)`
+
+--
+
+* Computationally efficient alternative to best subsets
+* Not guaranteed to find best possible model
+		
+---
+
+# Selection *Methods*: Backward Stepwise Selection
+
+* Begin with *full* model (all `\(p\)` predictors; `\(\mathcal{M}_p\)`)
+
+* For `\(k = p, \dots, 1\)`:
+
+* Consider all `\(k\)` models that contain all but one of the predictors in `\(\mathcal{M}_k\)`
+* Choose the best among these `\(k\)` models (largest `\(R^2\)`), and call it `\(\mathcal{M}_{k-1}\)`
+
+* Select a single best model from among `\(\mathcal{M}_0, \dots, \mathcal{M}_p\)`
+
+--
+
+* Computationally efficient alternative to best subsets
+* Not guaranteed to find best possible model
+
+---
+
+# Selection *Methods*: Mixed Stepwise Selection
+
+* Begin with *null* model (no predictors)
+
+* Add the variables one-by-one that provide the best fit
+
+* If at any point the p-value for one of the variables in the model rises above a certain threshold, remove it
+
+* Continue forward \&amp; backward steps until all variables in the model have sufficiently low p-value
+
+--
+
+* Computationally efficient alternative to best subsets
+* Can beat forward/backward selection at finding best subset
+
+---
+
+# Model Selection in `R`
+
+
+```r
+library(leaps)
+
+mymodel &lt;- regsubsets(Sales~., data = Carseats, method = "forward")
+
+mysummary &lt;- summary(mymodel)
+
+mysummary$adjr2
+```
+
+```
+## [1] 0.2486272 0.4672324 0.6271738 0.7094971 0.7754212 0.8455640 0.8696965
+## [8] 0.8698854
+```
+
+```r
+mysummary$bic
+```
+
+```
+## [1] -103.3622 -235.9037 -373.7102 -468.5296 -566.5070 -711.3106 -774.3036
+## [8] -769.9144
+```
+
+---
+
+# Inference for Individual Terms
+
+* We also have access to hypothesis testing for individual terms:
+
+.center[
+`\(H_0: \beta_j = 0\)`
+`\(H_a: \beta_j \neq 0\)`
+]
+	
+* This will be a t-test with details usually found in the software output.	
+
+&lt;img src="C:/Users/kbodwin/Dropbox/Adventures_in_R/UPS_Trainings/Day-3/Slides/Images/FullModelOutput.png" width="50%" height="50%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Potenial Model Problems and Conditions for Inference
+
+* For the hypothesis tests we've discussed to be valid and interpretable we need certain things to be true:
+
+* Linearity of the response-predictor relationships
+* Independence of error terms (observations)
+* Constant variance of error terms
+* Normality of the errors
+
+
+
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

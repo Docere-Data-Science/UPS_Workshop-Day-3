@@ -1,0 +1,112 @@
+---
+title: "Activity: HipHop Lyrics"
+author: ""
+output:
+  prettydoc::html_pretty:
+    theme: tactile
+    highlight: github
+    css: styles.css
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      echo=FALSE, warning=FALSE, message=FALSE,eval=FALSE)
+
+```
+
+## Instructions and Tips
+
+Please submit an HTML document created using R Markdown.
+
+* The first chunk of your R Markdown document should be to set the *global chunk options*.
+
+* The second chunk of your R Markdown document should be to *declare your libraries* (probably only `tidyverse` for now).
+
+* You may have to Google to solve some of these!
+
+* Be sure to **save** your work regularly (*Ctrl/Cmd+S* or *File > Save* or the floppy disk icon)
+
+* Be sure to **knit** your file every so often, to check for errors and make sure it looks nice.
+
+    + Make your R Markdown document does not contain `View(dataset)` or `install.packages("package")`, both of these will prevent knitting.
+    
+    + Check your R Markdown document for moments when you looked at the data by typing the name of the data frame.  Leaving these in means the whole dataset will print out!
+    
+    + If all else fails, you can set your *chunk option* or *global option* to `error = TRUE`, which will allow the file to knit even if errors are present.
+    
+---
+
+
+## The dataset
+
+The data set "hiphop" contains results from a study conducted by a linguist at the University of Minnesota.  The researcher was interested in predicting musical taste based on familiarity with African American English (AAE).  168 subjects participated in the study, and each was asked to define 64 different AAE terms.  The definitions given were used to create a "familiarity" score for each subject for each term.  This score quantifies how well the subject knew the term on a scale of 1-5 (1 = not at all, 5 = very well).  Before tackling the problems, **study the information on the following website**, which includes a description of each variable:
+
+[http://conservancy.umn.edu/bitstream/handle/11299/116327/5/explanationAAEHiphopChesley.txt](http://conservancy.umn.edu/bitstream/handle/11299/116327/5/explanationAAEHiphopChesley.txt)
+
+
+
+You can download the data [at this Dropbox link](https://www.dropbox.com/s/5d8fwxrj3jtua1z/hiphop.csv?dl=0).
+
+---
+
+## Assignment
+
+### Summary
+
+#### 1. 
+
+Provide a brief overview (2-4 sentences) of the dataset. (It is always good practice to start an analysis by getting a feel for the data and providing a quick summary for readers.) You do **not** need to show any source code for this question, although you probably want to use code to get information.
+
+#### 2. 
+
+Clean the dataset in whichever ways you see fit.  This might mean adjusting *variable type*, for example from "character" to "factor", or dealing with missing data.
+
+#### 3. 
+
+How many unique AAVE words were studied in this dataset?
+
+#### 4. 
+
+Make a new variable that recategorizes `ethnic` into only two groups, "white" and "non-white", to simplify your data.
+
+Helpful functions: `mutate()`, `case_when()`
+
+
+#### 5. 
+
+What are the demographics of the people in this study?  Investigate the variables `sex`, `age`, and `ethnic` and summarize your findings in 1-3 complete sentences.  
+
+*Hint: What are the rows of this dataset?  It is __not__ one person per row!  You'll need to first manipulate your data to have each person represented only once.*
+
+Helpful functions:  `select()`, `unique()` or `distinct(, .keep_all = TRUE)`, `count()`,  `summary()`
+
+
+#### 6. 
+
+Make at least two plots to display the demographic information of the subjects in this study.  You do not need to discuss these plots, but make sure they are appropriate to the data types and have informative titles and axis labels.
+
+Functions:  `ggplot()`, `geom_histogram()`, `geom_boxplot()`, `geom_bar()`, `ggtitle()`, `xlab()`, `ylab()`
+
+
+### Familiar words
+
+#### 1.  
+
+For each demographic group listed below, determine which word(s) in this study was the most and least familiar on average.
+
+a. People below the age of 20
+b. Non-white women
+c. White men above the age of 30
+
+Helpful functions: `filter()`, `arrange()`, `desc()`, `top_n()`
+
+#### 2. 
+
+For each demographic comparison below, determine which music genre most differentiates the groups.  That is, which genre had much higher average (mean or median) score in one group than the other.
+
+a. Male versus Female
+b. White versus Non-White
+c. Age below 21 versus age 21+
+
+Helpful functions: `group_by()`, `summarize()`, `distinct()`
+

@@ -1,0 +1,5 @@
+"0","my_test <- mtcars %>%"
+"0","  t_test(response = mpg,"
+"0","         explanatory = am)"
+"2","The statistic is based on a difference or ratio; by default, for difference-based statistics, the explanatory variable is subtracted in the order ""0"" - ""1"", or divided in the order ""0"" / ""1"" for ratio-based statistics. To specify this order yourself, supply `order = c(""0"", ""1"")`."
+"0","my_test"

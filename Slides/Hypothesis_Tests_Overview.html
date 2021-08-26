@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Hypothesis Testing</title>
+    <meta charset="utf-8" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# Hypothesis Testing
+
+---
+
+
+
+
+class: center, middle
+
+# Overview
+## R: Hypotheses
+## E: Significance Level
+## C: Test Statistic
+## A: P-value
+## P: Conclusion
+---
+## Research Question -&gt; Hypotheses
+
+
+
+
+
+**RQ:** Do California grizzlies have a different average weight than Mexican grizzlies?
+
+--
+
+* What if the answer is *no*?
+
+    `$$H_0: \mu_C = \mu_M$$`
+    "Californian and Mexican grizzlies have the same true mean weight."
+
+--
+
+* What if the answer is *yes*?
+
+`$$H_A: \mu_C \neq \mu_M$$`
+
+"Californian and Mexican grizzlies do not have the same true mean weight."
+
+---
+## Evidence -&gt; Significance level
+
+We plan to take a sample of CA and MX grizzlies.
+
+* What data would support the **alternate hypothesis**?
+
+--
+
+If the average weight of the CA grizzlies were much larger than the average weight of MX grizzlies
+
+*or*
+
+If the average weight of the MX grizzlies were much larger than the average weight of CA grizzlies
+
+-- 
+
+* How strong would the evidence need to be to **convince you**?
+
+`$$\alpha = 0.05$$`
+
+"We perform this test at the 0.05 significance level."
+
+"We will reject the null if the p-value is below 0.05."
+
+"We need to see data that has a 5% or less chance of happening, under the null, to be convinced."
+
+---
+## Collect Data -&gt; Test Statistic
+
+
+```r
+set.seed(1847)
+grizzlies %&gt;% group_by(Type) %&gt;% summarize_at(vars(Weight), funs(mean, sd, n()))
+```
+
+```
+## # A tibble: 2 x 4
+##   Type         mean    sd     n
+##   &lt;fct&gt;       &lt;dbl&gt; &lt;dbl&gt; &lt;int&gt;
+## 1 Californian  398.  122.    33
+## 2 Mexican      422.  171.    28
+```
+
+--
+
+`$$\bar{x}_C = 40.1, \bar{x}_M = 45.1$$`
+`$$s_C = 21.4, s_M = 27.3$$`
+`$$n_C = 44, n_M = 40$$`
+
+`$$SE_{diff} = 5.3889175$$`
+
+---
+## Test Statistic
+
+The **test statistic** is the one value that summarize all of our evidence.
+
+* t-score or t-statistic
+
+* z-score or z-statistic
+
+* Chi-sq statistic
+
+* ... many more!
+
+--
+
+We have to use a test statistic that lets us find a **p-value**!
+
+That means we have to know the **distribution** of the test statistic, for it to be useful!
+
+* t/z-score:  The CLT helps us.
+
+* Comparing across categories:  Permutation to simulate distribution
+
+* Other statistics:  *mathemagic* + computers
+
+---
+## Analysis -&gt; p-value
+
+What are the chances of getting this much evidence, or more, just by luck?  (If the null is true.)
+
+`$$t = \frac{40.1 - 45.1}{5.33} = -0.94$$`
+
+* What t-score did we *expect* under the null?
+
+* What is the standard deviation of the *t-score* curve?
+
+* What area would be *more evidence* for the **alternate hypothesis**?
+
+---
+class: center, middle
+
+# Minor detail: Two-sided or one-sided?
+
+---
+## Two-sided vs one-sided
+
+What if your research question had been...
+
+&gt; Do California grizzlies weigh less on average than Mexican grizzlies?
+
+... or ... 
+
+&gt; Do California grizzlies weigh more on average than Mexican grizzlies?
+
+---
+## Two-sided vs one-sided
+
+What if your research question had been...
+
+&gt; Do California grizzlies weigh less on average than Mexican grizzlies?
+
+`$$H_a:  \mu_C &lt; \mu_M$$`
+
+p-value:  0.16
+
+--
+
+&gt; Do California grizzlies weigh less on average than Mexican grizzlies?
+
+`$$H_a:  \mu_C &gt; \mu_M$$`
+
+p-value:  0.84
+
+---
+## Analysis -&gt; p-value
+
+What are the chances of getting this much evidence, or more, just by luck?  (If the null is true.)
+
+`$$t = \frac{40.1 - 45.1}{5.33} = -0.94$$`
+
+*Estimated* p-value:  0.32
+
+*Exact* p-value: 
+
+
+```
+## [1] 0.3530035
+```
+
+--
+
+"There is a 35% chance of seeing a difference of sample mean weights of 5lbs or greater, if in fact there is no true difference in mean weights."
+
+---
+## Presentation/Conclusion
+
+"With a t-score of -0.94 and 39 degrees of freedom, we get a p-value of 0.35.  We fail to reject the null at the 0.05 level.  We conclude that there is no evidence of a true difference in mean weights between Californian and Mexican grizzlies."
+
+--
+
+## THESE ARE BAD:
+
+* "There is 35% chance that the null is true"
+
+* "We found evidence that there is no difference in mean weights."
+
+* "After seeing the p-value, we decided to use a signficance level of 0.10 instead."
+
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

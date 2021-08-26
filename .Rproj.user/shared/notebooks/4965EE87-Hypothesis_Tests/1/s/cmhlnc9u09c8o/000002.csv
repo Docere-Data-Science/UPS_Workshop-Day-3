@@ -1,0 +1,7 @@
+"0","mtcars %>%"
+"0","  mutate("
+"0","    am = factor(am),"
+"0","    gear = factor(gear)"
+"0","  ) %>%"
+"0","  chisq_test(gear ~ am)"
+"2","Chi-squared approximation may be incorrect"

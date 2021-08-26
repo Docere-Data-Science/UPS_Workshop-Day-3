@@ -1,0 +1,340 @@
+---
+title: "Hypothesis Testing"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: xaringan-themer.css
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      ratio: '16:9' 
+---
+
+```{r setup, include=FALSE}
+options(htmltools.dir.version = FALSE)
+library(tidyverse)
+library(lubridate)
+library(palmerpenguins)
+```
+
+```{r xaringan-themer, include=FALSE}
+library(xaringanthemer)
+style_duo(
+  primary_color = "#26116c",
+  secondary_color = "#fd5e53",
+  title_slide_text_color = "#fff8e7",
+  header_font_google = google_font("Roboto"),
+  text_font_google   = google_font("Roboto Condensed"),
+  code_font_google   = google_font("Droid Mono")
+)
+```
+
+```{r, include = FALSE}
+library(tidyverse)
+library(couRsework)
+library(flair)
+library(lubridate)
+set.seed(534)
+```
+
+---
+## Setup
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+```
+
+---
+## Difference of means
+
+The `mtcars` dataset contains information about 32 cars.
+
+Suppose we want to know if automatic and manual cars have the same miles per gallon.
+
+--
+
+```{r}
+
+mtcars %>%
+  group_by(am) %>%
+  summarize(mean(mpg))
+
+```
+
+
+---
+## Difference of Means
+
+Of course, the 32 car models in this dataset are **not** all the
+cars in the world.  
+
+--
+
+So the **true difference of means** between is probably not *exactly* 24.4-17.1 = 7.3.
+
+--
+
+But do we have **evidence** that the difference in means is **not zero**?
+
+---
+## Two-sample t-test
+
+```{r}
+my_test <- mtcars %>%
+  t_test(response = mpg,
+         explanatory = am)
+
+my_test
+```
+
+Based on **this sample**, we have **strong evidence** that the mpg is different.
+
+---
+## Two-sample t-test
+
+```{r}
+t.test(mpg ~ am, data = mtcars)
+```
+
+---
+## Two-sample t-test
+
+```{r}
+t.test(mpg ~ am, data = mtcars) %>%
+  tidy()
+```
+
+
+---
+## Significance vs effect size
+
+
+In English, "significant" means **important** or **big**.
+
+--
+
+In French, "*significant*" means **signifying** or **indicative**.
+
+--
+
+**Statistical Significance** comes from the French version.
+
+---
+## Significance vs effect size
+
+
+The **effect size** can be large but **insignificant**.
+
+--
+
+
+> You sample 3 people from California and 3 people from New York.  You find a difference in average annual salaries of $500,000.  Does this *signify* that CA and NY have different salaries overall?
+
+--
+
+The **effect size** can be small but **significant**.
+
+--
+
+> You sample 1000 people from California and 1000 people from New York.  You find a difference in average annual salaries of $10.  Does this *signify* that CA and NY have different salaries overall?
+
+---
+## Reporting results
+
+We need to report both the effect size **and** the significance.
+
+--
+
+> We observe that on average, manual cars have 7.3 more miles per gallon than automatic cars.
+
+> With a p-value of 0.001, we reject the null hypothesis that mpgs is equal.  We have strong evidence that manual cars have more mpg on average.
+
+---
+class: center, middle, inverse
+# What assumptions did we rely on?
+
+---
+## The t distribution
+
+```{r, echo = FALSE}
+ggplot(mtcars, aes(x = mpg)) +  
+  geom_histogram(aes(y = ..density..), binwidth = 1, fill = "pink", color = "black")+
+  stat_function(fun = dnorm,
+                args = list(mean = mean(mtcars$mpg), sd = sd(mtcars$mpg)),
+                color = "cornflowerblue", lwd = 1.5) +
+  coord_cartesian(xlim = c(50, 65)) +
+  theme_bw()
+```
+
+---
+class: center, middle, inverse
+# The Central Limit Theorem!
+
+--
+
+## The *sample mean* is approximately Normal (t)
+
+## As long as it's a mean of many (say > 15) samples.
+
+---
+class: center, middle, inverse
+# Categorical Data
+
+---
+
+## Transmission and gears
+
+Now consider the question:  Do automatic and manual cars tend to have different types of engines?
+
+--
+
+```{r}
+mtcars %>%
+  count(am, cyl)
+```
+
+---
+
+## Transmission and gears
+
+We **could** do a t-test of "average cylinders" - but this doesn't really make sense; these are *categories* of engine types.
+
+--
+
+Instead: **chi-square tests**
+
+--
+
+Null hypothesis:  There is **no relationship** between transmission type and engine type.
+
+--
+
+Alternate hypothesis:  There **is a relationship**.
+
+---
+
+## Transmission and gears
+
+```{r}
+mtcars %>%
+  janitor::tabyl(am, cyl)
+```
+
+---
+
+## Transmission and gears
+
+```{r}
+library(janitor)
+
+mtcars %>%
+  tabyl(am, cyl) %>%
+  adorn_percentages()
+```
+
+---
+
+## Transmission and gears
+
+What happens if you swap the order of the variables?
+
+--
+
+```{r}
+
+mtcars %>%
+  tabyl(cyl, am) %>%
+  adorn_percentages()
+```
+
+---
+## Transmission and gears
+
+```{r, error = TRUE}
+mtcars %>%
+  chisq_test(am ~ cyl)
+```
+---
+
+## Transmission and gears
+
+
+```{r, error = TRUE}
+mtcars %>%
+  mutate(
+    am = factor(am),
+    cyl = factor(cyl)
+  ) %>%
+  chisq_test(am ~ cyl)
+```
+
+---
+
+## Transmission and gears
+
+What happens if you switch the order of the variables?
+
+```{r, error = TRUE}
+mtcars %>%
+  mutate(
+    am = factor(am),
+    cyl = factor(cyl)
+  ) %>%
+  chisq_test(cyl ~ am)
+```
+
+---
+## Conclusion
+
+We have **evidence** that there is a relationship between transmission type and engine type.
+
+--
+
+Manual cars tend to have more 4-cylinder engines, while automatic cars tend to have more 8-cylinder engines
+
+---
+## Word of Caution
+
+Do automatic cars and manual cars tend to have a different number of gears?
+
+```{r}
+mtcars %>%
+  tabyl(am, gear) %>%
+  adorn_percentages()
+```
+
+---
+## Word of Caution
+
+```{r, error = TRUE}
+mtcars %>%
+  mutate(
+    am = factor(am),
+    gear = factor(gear)
+  ) %>%
+  chisq_test(gear ~ am)
+```
+
+---
+## Word of Caution
+
+```{r, error = TRUE}
+mtcars %>%
+  tabyl(am, gear) %>%
+  fisher.test()
+```
+
+
+---
+class: center, middle, inverse
+
+# Your Turn!
+
+---
+# Your Turn
+
+* Do automatic cars and manual cars tend to have different horsepower?
+
+* Do automatic cars and manual cars tend to have a different shape of engine?  (Hint: `?mtcars` for more info about the dataset.)
